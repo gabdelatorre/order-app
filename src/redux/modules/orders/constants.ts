@@ -949,7 +949,7 @@ export const MOCK_ORDERS: TOrderList[] = [
     customer: 'John Doe',
     totalPrice: 269.98,
     currency: 'USD',
-    paymentStatus: PaymentStatus.PAID,
+    paymentStatus: PaymentStatus.UNPAID,
     paymentMethod: 'Manual Bank Transfer',
     data: {
       customer: {

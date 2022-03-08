@@ -1,91 +1,27 @@
-import { createContext, Dispatch, FC, FunctionComponent, useContext, useEffect, useReducer, useState } from 'react';
+import { createContext, FC, FunctionComponent, MouseEvent, useContext, useEffect, useReducer, useState } from 'react';
 import moment from 'moment';
 import { useDispatch } from 'react-redux';
-import styled from 'styled-components';
 
 import { Card, EmptyState, Pagination } from '../../components';
 import { deleteOrder, getOrders } from '../../redux/modules/orders/actions';
-import { OrderStatus, TGetOrderRequest, TOrderList } from '../../redux/modules/orders/types';
+import { OrderStatus } from '../../redux/modules/orders/types';
 import { useTypedSelector } from '../../utils/useTypedSelector';
 import { DEFAULT_PAGE_SIZE, DEFAULT_TABLE_STATE, OrderStatusTab, ORDER_TABS } from './constants';
-import { StyledHeaderBreadcrumb, ViewContainer, SpinnerContainer } from './styles';
+import {
+  StyledHeaderBreadcrumb,
+  ViewContainer,
+  SpinnerContainer,
+  StyledTable,
+  OrderTableContainer,
+  PaginationContainer,
+  MenuButton,
+} from './styles';
 import tableReducer from './reducer';
-import { TableActions, TTableActions } from './types';
-import { Table, Spinner, Form, Button, Dropdown } from 'react-bootstrap';
+import { TableActions, TOrderListContext } from './types';
+import { Spinner, Dropdown } from 'react-bootstrap';
 import { OrderListFilters } from './OrderListFilters';
-
-const StyledTable = styled(Table)`
-  font-size: 12px;
-
-  th {
-    text-transform: uppercase;
-  }
-
-  tr:hover {
-    cursor: pointer;
-    background-color: #fafafa;
-  }
-
-  td {
-    height: 60px;
-    vertical-align: middle;
-    border-bottom: 1px solid #dfdfdf;
-  }
-`;
-
-const OrderTableContainer = styled.div`
-  height: 660px;
-  overflow: auto;
-`;
-
-const PaginationContainer = styled.div`
-  display: flex;
-  justify-content: space-between;
-  height: 50px;
-  align-items: center;
-`;
-
-const MenuButton = styled(Dropdown.Toggle)`
-  background-color: transparent;
-  border: none;
-  outline: none;
-  box-shadow: none !important;
-
-  :after {
-    display: none;
-  }
-
-  &:active,
-  &:focus {
-    outline: none;
-  }
-
-  &:hover,
-  &:active,
-  &:focus {
-    background-color: #4a4a4a !important;
-    i {
-      color: #ffffff !important;
-    }
-  }
-
-  i {
-    color: #4a4a4a;
-  }
-`;
-
-interface TOrderListContext {
-  orderList: TOrderList[];
-  currentTablePage: number;
-  totalOrderSize: number;
-  isLoading: boolean;
-  tableState: TGetOrderRequest;
-  tableDispatch: Dispatch<TTableActions>;
-  orderStatusTab: OrderStatusTab;
-  handleTabChange: (idx: number) => void;
-  handleDeleteOrder: (id: string) => void;
-  handlePaginationChange: (pageNumber: number) => void;
-}
+import { OrderDetails } from '../OrderDetails';
+import { TOrderDetailsDialogData } from '../OrderDetails/types';
 
 const OrderListContext = createContext({} as TOrderListContext);
 
@@ -102,20 +38,6 @@ export const OrderListProvider: FC = ({ children }) => {
   const handleTabChange = (idx: number) => {
     setOrderStatusTab(idx);
     const tabFilter = { column: 'status', value: Object.values(OrderStatus)[idx] };
-    //let filterOptions = [];
-
-    //if (!tableState.filterOption) {
-    //  filterOptions.push(tabFilter);
-    //} else {
-    //  const currentFilterOptions = tableState.filterOption.slice();
-    //  const statusFilter = currentFilterOptions.find((filter) => filter.column === 'status');
-    //  if (statusFilter) {
-    //    statusFilter.value = Object.values(OrderStatus)[idx];
-    //  } else {
-    //    currentFilterOptions.push(tabFilter);
-    //  }
-    //  filterOptions = currentFilterOptions;
-    //}
 
     tableDispatch({
       type: TableActions.SET_TABLE_OPTIONS,
@@ -171,9 +93,19 @@ export const OrderList: FunctionComponent = () => {
     handleDeleteOrder,
     handlePaginationChange,
   } = useOrderList();
+  const [currentOrder, setCurrentOrder] = useState<TOrderDetailsDialogData | undefined>();
 
-  const renderCardHeader = () => {
-    return <OrderListFilters />;
+  const handleViewDetails = (props: TOrderDetailsDialogData) => () => {
+    setCurrentOrder(props);
+  };
+
+  const handleCloseDetails = () => {
+    setCurrentOrder(undefined);
+  };
+
+  const handleMenuClick = (id: string) => (event: MouseEvent) => {
+    event.stopPropagation();
+    handleDeleteOrder(id);
   };
 
   const renderPagination = () => {
@@ -194,7 +126,7 @@ export const OrderList: FunctionComponent = () => {
     );
   };
 
-  const renderCardContent = () => {
+  const renderTable = () => {
     if (isLoading) {
       return (
         <SpinnerContainer>
@@ -223,11 +155,17 @@ export const OrderList: FunctionComponent = () => {
             <tbody>
               {orderList?.map((order) => {
                 const createdDate = moment(order.createdDate).format('DD/MM/YYYY');
-                console.log(createdDate);
                 return (
-                  <tr key={order.id}>
+                  <tr
+                    key={order.id}
+                    onClick={handleViewDetails({
+                      paymentStatus: order.paymentStatus,
+                      details: order.data,
+                      createdDate: order.createdDate,
+                    })}
+                  >
                     <td>{order.id}</td>
-                    <td>{createdDate.toString()}</td>
+                    <td>{createdDate}</td>
                     <td>{order.logisticStatus}</td>
                     <td>{order.customer}</td>
                     <td>{`${order.currency} ${order.totalPrice}`}</td>
@@ -235,17 +173,15 @@ export const OrderList: FunctionComponent = () => {
                     <td>{order.paymentMethod}</td>
                     <td>
                       <Dropdown>
-                        <MenuButton variant='success' id='dropdown-basic'>
-                          <i className='fa-solid fa-ellipsis-vertical'></i>
-                        </MenuButton>
-
+                        <div onClick={(e: MouseEvent) => e.stopPropagation()}>
+                          <MenuButton variant='success' id='dropdown-basic'>
+                            <i className='fa-solid fa-ellipsis-vertical'></i>
+                          </MenuButton>
+                        </div>
                         <Dropdown.Menu>
-                          <Dropdown.Item onClick={() => handleDeleteOrder(order.id)}>Delete</Dropdown.Item>
+                          <Dropdown.Item onClick={handleMenuClick(order.id)}>Delete</Dropdown.Item>
                         </Dropdown.Menu>
                       </Dropdown>
-                      {/*<IconButton>
-                        <i className='fa-solid fa-ellipsis-vertical'></i>
-                      </IconButton>*/}
                     </td>
                   </tr>
                 );
@@ -262,9 +198,12 @@ export const OrderList: FunctionComponent = () => {
     <ViewContainer>
       <StyledHeaderBreadcrumb active={ORDER_TABS[orderStatusTab]} />
       <Card>
-        <Card.Header> {renderCardHeader()} </Card.Header>
-        <Card.Content> {renderCardContent()} </Card.Content>
+        <Card.Header>
+          <OrderListFilters />
+        </Card.Header>
+        <Card.Content> {renderTable()} </Card.Content>
       </Card>
+      <OrderDetails data={currentOrder} visible={Boolean(currentOrder)} onClose={handleCloseDetails} />
     </ViewContainer>
   );
 };

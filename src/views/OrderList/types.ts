@@ -1,5 +1,26 @@
-import { TGetOrderRequest, TPageOption, TSearchFilterOption, TSortOption } from '../../redux/modules/orders/types';
+import {
+  TGetOrderRequest,
+  TOrderList,
+  TPageOption,
+  TSearchFilterOption,
+  TSortOption,
+} from '../../redux/modules/orders/types';
 import type { Action as ReduxAction } from 'redux';
+import { Dispatch } from 'react';
+import { OrderStatusTab } from './constants';
+
+export interface TOrderListContext {
+  orderList: TOrderList[];
+  currentTablePage: number;
+  totalOrderSize: number;
+  isLoading: boolean;
+  tableState: TGetOrderRequest;
+  tableDispatch: Dispatch<TTableActions>;
+  orderStatusTab: OrderStatusTab;
+  handleTabChange: (idx: number) => void;
+  handleDeleteOrder: (id: string) => void;
+  handlePaginationChange: (pageNumber: number) => void;
+}
 
 export enum TableActions {
   SET_TABLE_OPTIONS = '@table/SET_TABLE_OPTIONS',

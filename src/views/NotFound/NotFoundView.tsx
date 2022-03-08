@@ -1,5 +1,5 @@
 import { FunctionComponent } from 'react';
 
 export const NotFoundView: FunctionComponent = () => {
-  return <div></div>;
+  return <div> Not Found! </div>;
 };

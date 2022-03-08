@@ -18,7 +18,6 @@ export const Pagination = ({ active, totalSize, pageSize, onChange }: TPaginatio
   useEffect(() => {
     let pCount = totalSize / pageSize;
     if (totalSize % pageSize > 0) pCount++;
-    console.log(pCount);
     setPageCount(Math.floor(pCount));
   }, [totalSize, pageSize]);
 

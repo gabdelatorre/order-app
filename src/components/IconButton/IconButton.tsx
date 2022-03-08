@@ -1,6 +1,6 @@
 import { FC } from 'react';
 import styled from 'styled-components';
-import { Button, ButtonProps, DropdownButton } from 'react-bootstrap';
+import { ButtonProps, DropdownButton } from 'react-bootstrap';
 
 const StyledButton = styled(DropdownButton)`
   background-color: transparent;
