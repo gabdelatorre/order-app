@@ -27,13 +27,19 @@ export const OrderListFilters = () => {
   const handleKeyPress = (event: KeyboardEvent) => {
     if (event.key === 'Enter') {
       tableDispatch({
-        type: TableActions.SET_TABLE_SEARCH,
-        payload: searchValue
-          ? {
-              column: 'customer',
-              value: searchValue,
-            }
-          : undefined,
+        type: TableActions.SET_TABLE_OPTIONS,
+        payload: {
+          pageOption: {
+            pageNumber: 1,
+            pageSize: 10,
+          },
+          searchOption: searchValue
+            ? {
+                column: 'customer',
+                value: searchValue,
+              }
+            : undefined,
+        },
       });
     }
   };
