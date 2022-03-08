@@ -129,12 +129,16 @@ export const OrderList: FunctionComponent = () => {
   const renderTable = () => {
     if (isLoading) {
       return (
-        <SpinnerContainer>
+        <SpinnerContainer data-testid='order-list-spinner'>
           <Spinner animation='border' />
         </SpinnerContainer>
       );
     } else if (orderList.length === 0) {
-      return <EmptyState primaryMessage='No data found' secondaryMessage='We could not find requested orders' />;
+      return (
+        <div data-testid='order-list-empty'>
+          <EmptyState primaryMessage='No data found' secondaryMessage='We could not find requested orders' />
+        </div>
+      );
     }
     return (
       <>
@@ -157,6 +161,7 @@ export const OrderList: FunctionComponent = () => {
                 const createdDate = moment(order.createdDate).format('DD/MM/YYYY');
                 return (
                   <tr
+                    data-testid={`order-list-row-${order.id}`}
                     key={order.id}
                     onClick={handleViewDetails({
                       paymentStatus: order.paymentStatus,
@@ -174,7 +179,7 @@ export const OrderList: FunctionComponent = () => {
                     <td>
                       <Dropdown>
                         <div onClick={(e: MouseEvent) => e.stopPropagation()}>
-                          <MenuButton variant='success' id='dropdown-basic'>
+                          <MenuButton data-testid={`order-list-menu-${order.id}`} variant='success' id='dropdown-basic'>
                             <i className='fa-solid fa-ellipsis-vertical'></i>
                           </MenuButton>
                         </div>

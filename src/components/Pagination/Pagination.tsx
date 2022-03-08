@@ -26,7 +26,12 @@ export const Pagination = ({ active, totalSize, pageSize, onChange }: TPaginatio
       {new Array(pageCount).fill(0).map((_, idx) => {
         const pageIdx = idx + 1;
         return (
-          <BSPagination.Item key={pageIdx} active={active === pageIdx} onClick={handlePaginationClick(pageIdx)}>
+          <BSPagination.Item
+            data-testid={`pagination-page-${pageIdx}`}
+            key={pageIdx}
+            active={active === pageIdx}
+            onClick={handlePaginationClick(pageIdx)}
+          >
             {idx + 1}
           </BSPagination.Item>
         );

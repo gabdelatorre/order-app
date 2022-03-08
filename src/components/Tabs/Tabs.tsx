@@ -34,7 +34,7 @@ export const Tabs = ({ active, onChange, tabs }: TTabsProps) => {
     <TabContainer>
       {tabs.map((tab, idx) => {
         return (
-          <TabItem key={tab} onClick={handleTabClick(idx)} active={active === idx}>
+          <TabItem data-testid={`tab-${tab}`} key={tab} onClick={handleTabClick(idx)} active={active === idx}>
             {' '}
             {tab}{' '}
           </TabItem>

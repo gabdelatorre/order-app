@@ -9,5 +9,5 @@ export interface TOrderDetailsDialogData {
 export interface TOrderDetailsProps {
   data?: TOrderDetailsDialogData;
   visible: boolean;
-  onClose: () => void;
+  onClose?: () => void;
 }
